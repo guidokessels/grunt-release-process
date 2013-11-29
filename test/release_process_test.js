@@ -28,7 +28,7 @@ exports.release_process = {
     done();
   },
   bump_version_number: function (test) {
-    var actual = grunt.file.readJSON('tmp/fixtures/package.json'),
+    var actual = grunt.file.readJSON('tmp/test/fixtures/package.json'),
         expected = grunt.file.readJSON('test/expected/package.json');
 
     test.expect(1);

@@ -34,15 +34,19 @@ module.exports = function (grunt) {
     // Back-up fixtures to use during tests
     copy: {
       setup: {
-        src  : 'test/fixtures/package.json',
-        dest : 'tmp/fixtures/package.json'
+        src  : 'test/fixtures/*',
+        dest : 'tmp/'
       }
     },
 
     // Configuration to be run (and then tested).
     release: {
       options: {
-        bump: ['tmp/fixtures/package.json']
+        bump: ['tmp/test/fixtures/package.json'],
+        changelog : {
+          file: 'tmp/test/fixtures/CHANGELOG.md',
+          title: '# {{version}} ({{date}})'
+        }
       }
     },
 
