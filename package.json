@@ -1,0 +1,40 @@
+{
+  "name": "grunt-release-process",
+  "version": "0.0.1",
+  "description": "Let Grunt manage your whole release process",
+  "homepage": "https://github.com/guidokessels/grunt-release-process",
+  "repository": "git@github.com:guidokessels/grunt-release-process.git",
+  "bugs": "git@github.com:guidokessels/grunt-release-process.git/issues",
+  "author": {
+    "name": "Guido Kessels",
+    "email": "guidokessels@gmail.com",
+    "url": "http://www.guidokessels.com"
+  },
+  "keywords": [
+    "gruntplugin"
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:guidokessels/grunt-release-process.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.2.0",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt": "~0.4.0rc2",
+    "load-grunt-tasks": "~0.2.0",
+    "jshint-stylish": "~0.1.3"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
+}
