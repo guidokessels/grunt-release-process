@@ -31,23 +31,18 @@ module.exports = function (grunt) {
       tests: ['tmp']
     },
 
+    // Back-up fixtures to use during tests
+    copy: {
+      setup: {
+        src  : 'test/fixtures/package.json',
+        dest : 'tmp/fixtures/package.json'
+      }
+    },
+
     // Configuration to be run (and then tested).
     release: {
-      default_options: {
-        options: {
-        },
-        files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
-      },
-      custom_options: {
-        options: {
-          separator: ': ',
-          punctuation: ' !!!'
-        },
-        files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
+      options: {
+        bump: ['tmp/fixtures/package.json']
       }
     },
 
@@ -63,7 +58,12 @@ module.exports = function (grunt) {
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'release', 'nodeunit']);
+  grunt.registerTask('test', [
+    'clean',
+    'copy:setup',
+    'release:patch',
+    'nodeunit'
+  ]);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jshint', 'test']);
