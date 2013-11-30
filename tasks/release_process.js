@@ -25,7 +25,9 @@ module.exports = function (grunt) {
           bump      : ['package.json'],
           changelog : {},
           commit    : 'Release <%= version %>',
-          tag       : 'Release <%= version %>'
+          tag       : 'Release <%= version %>',
+          push      : true,
+          remote    : 'origin'
         }),
         // Keep track of all the files we need to commit
         filesToCommit = [];
@@ -38,7 +40,7 @@ module.exports = function (grunt) {
     }
     
     function fail() {
-      done(false);
+      throw done(false);
     }
 
     function processTemplate(tpl) {
@@ -108,18 +110,19 @@ module.exports = function (grunt) {
           silent: false
         }).output + config.seperator;
 
+        grunt.log.writeln('');
+
         grunt.file.write(config.file, [title, commits, filecontents].join('\n'));
 
         filesToCommit.push(config.file);
 
-        grunt.log.writeln('');
         grunt.log.ok();
       }
 
     }
 
     function commit(config) {
-      var commitMsg;
+      var commitMsg, result;
 
       if (config.commit && filesToCommit.length) {
         grunt.log.subhead('Committing all release files');
@@ -132,32 +135,60 @@ module.exports = function (grunt) {
         });
 
         commitMsg = processTemplate(config.commit);
+        grunt.verbose.writeln('Resolved commit message to: ' + commitMsg);
 
-        shell.exec('git commit -m "' + commitMsg + '"');
+        result = shell.exec('git commit -m "' + commitMsg + '"', {silent: true});
+        if (result && 0 !== result.code) {
+          grunt.log.warn('Could not changed files: ' + result.output);
+          return fail();
+        }
 
         grunt.log.ok();
       }
     }
 
     function tag(config) {
-      var tagMsg;
+      var tagMsg, result;
 
       if (false !== config.tag) {
         grunt.log.subhead('Creating tag');
 
         tagMsg = processTemplate(config.tag);
+        grunt.verbose.writeln('Resolved tag message to: ' + tagMsg);
 
-        shell.exec('git tag -a ' + newVersion + ' -m "' + tagMsg + '"');
+        result = shell.exec('git tag -a ' + newVersion + ' -m "' + tagMsg + '"', {silent: true});
+        if (result && 0 !== result.code) {
+          grunt.log.warn('Could not create tag: ' + result.output);
+          return fail();
+        }
 
-        grunt.log.ok();
+        grunt.log.ok('Tag ' + newVersion + ' created successfully!');
       }
     }
 
+    function push_to_remote(config) {
+      var result;
+
+      if (false !== config.push && 'string' === typeof config.remote) {
+        grunt.log.subhead('Pushing release to remote');
+
+        result = shell.exec('git push ' + config.remote + ' --tags', {silent: true});
+        if (result && 0 !== result.code) {
+          grunt.log.warn('Could not push changes to remote!');
+          return fail();
+        }
+
+        grunt.log.ok('Tag ' + newVersion + ' pushed to "' + config.remote + '" remote successfully!');
+      }
+    }
+
+    // Steps
     verify_release_type(type);
     bump_version(options.bump, type);
     generate_changelog(options.changelog, type);
     commit(options);
     tag(options);
+    push_to_remote(options);
 
     done(true);
   });
