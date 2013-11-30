@@ -46,7 +46,8 @@ module.exports = function (grunt) {
         changelog : {
           file: 'tmp/test/fixtures/CHANGELOG.md',
           title: '# {{version}} ({{date}})'
-        }
+        },
+        commit: false
       }
     },
 

@@ -24,15 +24,16 @@ module.exports = function (grunt) {
         options    = this.options({
           bump      : ['package.json'],
           changelog : {},
-          commit    : 'Release <%= version %>'
+          commit    : 'Release <%= version %>',
+          tag       : 'Release <%= version %>'
         }),
         // Keep track of all the files we need to commit
         filesToCommit = [];
 
     if (options.changelog) {
-      options.changelog.file      = options.changelog.file      || 'CHANGELOG.md';
-      options.changelog.title     = options.changelog.title     || '# <%= version %>';
-      options.changelog.seperator = options.changelog.seperator || '\n';
+      options.changelog.file         = options.changelog.file         || 'CHANGELOG.md';
+      options.changelog.title        = options.changelog.title        || '# <%= version %>';
+      options.changelog.seperator    = options.changelog.seperator    || '\n';
       options.changelog.commitFormat = options.changelog.commitFormat || '- %s ([%h](%H))';
     }
     
@@ -40,12 +41,21 @@ module.exports = function (grunt) {
       done(false);
     }
 
+    function processTemplate(tpl) {
+      return grunt.template.process(tpl, {
+        data: {
+          version : newVersion,
+          date    : grunt.template.today('yyyy-mm-dd')
+        }
+      });
+    }
+
     function verify_release_type(type) {
       grunt.verbose.write('Verifying release type...');
       if (-1 === ['major', 'minor', 'patch'].indexOf(type)) {
         grunt.log.warn(type ? '"' + type + '" is not a valid release type!' : 'No release type specified!');
         grunt.log.warn('Please use one of: "major", "minor", "patch"');
-        fail();
+        return fail();
       }
       grunt.verbose.ok();
     }
@@ -90,12 +100,7 @@ module.exports = function (grunt) {
 
         // Convert to Lo-Dash template and resolve to title
         titleTPL = config.title.replace(/{{/g, '<%= ').replace(/}}/g, ' %>');
-        title = grunt.template.process(titleTPL, {
-          data: {
-            version : newVersion,
-            date    : grunt.template.today('yyyy-mm-dd')
-          }
-        });
+        title = processTemplate(titleTPL);
         grunt.verbose.writeln('Resolved title to: ' + title);
 
         grunt.verbose.writeln('Retrieving and parsing all commits since previous tag');
@@ -114,17 +119,35 @@ module.exports = function (grunt) {
     }
 
     function commit(config) {
+      var commitMsg;
+
       if (config.commit && filesToCommit.length) {
         grunt.log.subhead('Committing all release files');
 
         filesToCommit.forEach(function(filename) {
-          grunt.verbose.writeln('Adding ' + filename);
+          grunt.verbose.writeln('\t' + filename);
           shell.exec('git add ' + filename, {
             silent: true
           });
         });
 
-        shell.exec('git commit -m "TEST"');
+        commitMsg = processTemplate(config.commit);
+
+        shell.exec('git commit -m "' + commitMsg + '"');
+
+        grunt.log.ok();
+      }
+    }
+
+    function tag(config) {
+      var tagMsg;
+
+      if (false !== config.tag) {
+        grunt.log.subhead('Creating tag');
+
+        tagMsg = processTemplate(config.tag);
+
+        shell.exec('git tag -a ' + newVersion + ' -m "' + tagMsg + '"');
 
         grunt.log.ok();
       }
@@ -134,35 +157,9 @@ module.exports = function (grunt) {
     bump_version(options.bump, type);
     generate_changelog(options.changelog, type);
     commit(options);
-    // create_tag();
+    tag(options);
 
     done(true);
-
-    // Iterate over all specified file groups.
-    /*this.files.forEach(function (file) {
-      // Concat specified files.
-      var src = file.src.filter(function (filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
-        }
-      }).map(function (filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
-
-      // Handle options.
-      src += options.punctuation;
-
-      // Write the destination file.
-      grunt.file.write(file.dest, src);
-
-      // Print a success message.
-      grunt.log.writeln('File "' + file.dest + '" created.');
-    });*/
   });
 
 };
