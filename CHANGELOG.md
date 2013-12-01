@@ -1,3 +1,7 @@
+# 0.1.2
+- Small correction & cleanups (a9f754c)
+- Updated README.md and added some extra logging (a54998e)
+
 # 0.1.1
 - Removed SHA-links until a fix for auto-linking can be found (682732e)
 
