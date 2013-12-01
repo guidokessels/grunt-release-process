@@ -41,13 +41,23 @@ module.exports = function (grunt) {
 
     // Configuration to be run (and then tested).
     release: {
-      options: {
-        bump: ['tmp/test/fixtures/package.json'],
-        changelog : {
-          file: 'tmp/test/fixtures/CHANGELOG.md',
-          title: '# {{version}} ({{date}})'
-        },
-        commit: false
+      test: {
+        options: {
+          bump: ['tmp/test/fixtures/package.json'],
+          changelog : {
+            file: 'tmp/test/fixtures/CHANGELOG.md',
+            title: '# {{version}} ({{date}})'
+          },
+          commit: false
+        }
+      },
+      dist: {
+        options: {
+          bump: ['package.json'],
+          changelog : {
+            file: 'CHANGELOG.md'
+          }
+        }
       }
     },
 
@@ -66,7 +76,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'clean',
     'copy:setup',
-    'release:patch',
+    'release:test:patch',
     'nodeunit'
   ]);
 

@@ -16,7 +16,7 @@ module.exports = function (grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerTask('release', 'Let Grunt manage your whole release process', function (type) {
+  grunt.registerMultiTask('release', 'Let Grunt manage your whole release process', function (type) {
 
     var done       = this.async(),
         newVersion = false,
@@ -175,6 +175,7 @@ module.exports = function (grunt) {
         result = shell.exec('git push ' + config.remote + ' --tags', {silent: true});
         if (result && 0 !== result.code) {
           grunt.log.warn('Could not push changes to remote!');
+          grunt.log.warn(result.output);
           return fail();
         }
 
