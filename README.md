@@ -2,6 +2,15 @@
 
 > Let Grunt manage your whole release process
 
+This Grunt plugin can automate a lot of steps in your release process, including:
+- Bumping the version number in your `package.json`, `bower.json`, etc.
+- Generating a changelog of all changes since your previous tag ([see example](CHANGELOG.md))
+- Committing the bumped files & changelog as a 'release' commit
+- Creating a tag for your release
+- Pushing the tag to GitHub (or any other Git remote)
+
+The only requirement is that your version numbers adhere to the [Semantic Versioning](http://semver.org) format: `major.minor.patch` e.g. `1.14.2`
+
 ## Getting Started
 This plugin requires Grunt.
 
@@ -17,16 +26,19 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-release-process');
 ```
 
-## The "release_process" task
+### Usage
+
+Run `grunt release:TARGET:TYPE` where `TARGET` is the options target in your `Gruntfile.js` and `TYPE` is one of `major`, `minor` or patch`
+
+## The "release" task
 
 ### Overview
-In your project's Gruntfile, add a section named `release_process` to the data object passed into `grunt.initConfig()`.
-
+In your project's Gruntfile, add a section named `release` to the data object passed into `grunt.initConfig()`.
 
 The following config lists all available options and their defaults:
 ```js
 grunt.initConfig({
-  release_process: {
+  release: {
     dist: {
       options: {
         bump      : ['package.json'],
@@ -52,7 +64,7 @@ grunt.initConfig({
 Type: `Array` or `false`
 Default value: `['package.json']`
 
-An array of files which versions need to be bumped.
+An array of files which versions need to be bumped. Each file needs to contain a valid JSON object with a `version` property.
 Use `false` or omit this property if you do not want to use it.
 
 #### options.changelog
