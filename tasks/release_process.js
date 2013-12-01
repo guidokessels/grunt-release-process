@@ -19,6 +19,7 @@ module.exports = function (grunt) {
   grunt.registerMultiTask('release', 'Let Grunt manage your whole release process', function (type) {
 
     var done       = this.async(),
+        oldVersion = false,
         newVersion = false,
         // Merge task-specific and/or target-specific options with these defaults.
         options    = this.options({
@@ -41,6 +42,10 @@ module.exports = function (grunt) {
     
     function fail() {
       throw done(false);
+    }
+
+    function exec(cmd, silent) {
+      return shell.exec(cmd, 'boolean' === typeof silent ? silent : true);
     }
 
     function processTemplate(tpl) {
@@ -67,23 +72,26 @@ module.exports = function (grunt) {
         grunt.log.subhead('Bumping version number');
         files.forEach(function(filename) {
           var contents   = grunt.file.readJSON(filename),
-              oldVersion;
+              currentVersionFromFile;
 
           if (!contents.version) {
             grunt.log.warn('Could not find a "version" property to bump in ' + filename + ' JSON.');
             return fail();
           }
 
-          oldVersion = contents.version;
+          currentVersionFromFile = contents.version;
           contents.version = semver.inc(contents.version, type);
 
           if (!newVersion) {
             newVersion = contents.version;
           }
+          if (!oldVersion) {
+            oldVersion = currentVersionFromFile;
+          }
 
           grunt.file.write(filename, JSON.stringify(contents, null, '  ') + '\n');
 
-          grunt.log.write('' + filename + ': ' + oldVersion + ' => ' + contents.version);
+          grunt.log.write('' + filename + ': ' + currentVersionFromFile + ' => ' + contents.version);
 
           filesToCommit.push(filename);
         });
@@ -106,9 +114,7 @@ module.exports = function (grunt) {
         grunt.verbose.writeln('Resolved title to: ' + title);
 
         grunt.verbose.writeln('Retrieving and parsing all commits since previous tag');
-        commits = shell.exec('git log --pretty=format:"' + config.commitFormat + '" --date-order', {
-          silent: false
-        }).output + config.seperator;
+        commits = exec('git log --pretty=format:"' + config.commitFormat + '" --date-order ' + oldVersion + '...HEAD', false).output + config.seperator;
 
         grunt.log.writeln('');
 
@@ -129,15 +135,13 @@ module.exports = function (grunt) {
 
         filesToCommit.forEach(function(filename) {
           grunt.verbose.writeln('\t' + filename);
-          shell.exec('git add ' + filename, {
-            silent: true
-          });
+          exec('git add ' + filename);
         });
 
         commitMsg = processTemplate(config.commit);
         grunt.verbose.writeln('Resolved commit message to: ' + commitMsg);
 
-        result = shell.exec('git commit -m "' + commitMsg + '"', {silent: true});
+        result = exec('git commit -m "' + commitMsg + '"');
         if (result && 0 !== result.code) {
           grunt.log.warn('Could not changed files: ' + result.output);
           return fail();
@@ -156,7 +160,7 @@ module.exports = function (grunt) {
         tagMsg = processTemplate(config.tag);
         grunt.verbose.writeln('Resolved tag message to: ' + tagMsg);
 
-        result = shell.exec('git tag -a ' + newVersion + ' -m "' + tagMsg + '"', {silent: true});
+        result = exec('git tag -a ' + newVersion + ' -m "' + tagMsg + '"');
         if (result && 0 !== result.code) {
           grunt.log.warn('Could not create tag: ' + result.output);
           return fail();
@@ -172,7 +176,7 @@ module.exports = function (grunt) {
       if (false !== config.push && 'string' === typeof config.remote) {
         grunt.log.subhead('Pushing release to remote');
 
-        result = shell.exec('git push ' + config.remote + ' --tags', {silent: true});
+        result = exec('git push ' + config.remote + ' --tags');
         if (result && 0 !== result.code) {
           grunt.log.warn('Could not push changes to remote!');
           grunt.log.warn(result.output);
