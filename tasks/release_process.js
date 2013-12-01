@@ -20,6 +20,7 @@ module.exports = function (grunt) {
 
     var done       = this.async(),
         newVersion = false,
+        latestTag  = false,
         // Merge task-specific and/or target-specific options with these defaults.
         options    = this.options({
           bump      : ['package.json'],
@@ -58,6 +59,11 @@ module.exports = function (grunt) {
       return result.output.trim();
     }
 
+    function determine_new_version() {
+      latestTag = get_latest_tag();
+      newVersion = semver.inc(latestTag || '0.0.0', type);
+    }
+
     function processTemplate(tpl) {
       return grunt.template.process(tpl, {
         data: {
@@ -92,10 +98,6 @@ module.exports = function (grunt) {
           currentVersionFromFile = contents.version;
           contents.version = semver.inc(contents.version, type);
 
-          if (!newVersion) {
-            newVersion = contents.version;
-          }
-
           grunt.file.write(filename, JSON.stringify(contents, null, '  ') + '\n');
 
           grunt.log.write('' + filename + ': ' + currentVersionFromFile + ' => ' + contents.version);
@@ -109,13 +111,12 @@ module.exports = function (grunt) {
     }
 
     function generate_changelog(config) {
-      var title, titleTPL, commits, filecontents, latestTag, range = '';
+      var title, titleTPL, commits, filecontents, range = '';
 
       if (config && config.file) {
         grunt.log.subhead('Updating changelog');
         filecontents = grunt.file.read(config.file);
 
-        latestTag = get_latest_tag();
         if (latestTag) {
           range = latestTag + '...HEAD';
         }
@@ -202,6 +203,7 @@ module.exports = function (grunt) {
     // Steps
     verify_release_type(type);
     bump_version(options.bump, type);
+    determine_new_version();
     generate_changelog(options.changelog, type);
     commit(options);
     tag(options);
