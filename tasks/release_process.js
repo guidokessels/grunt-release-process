@@ -19,7 +19,6 @@ module.exports = function (grunt) {
   grunt.registerMultiTask('release', 'Let Grunt manage your whole release process', function (type) {
 
     var done       = this.async(),
-        oldVersion = false,
         newVersion = false,
         // Merge task-specific and/or target-specific options with these defaults.
         options    = this.options({
@@ -46,6 +45,15 @@ module.exports = function (grunt) {
 
     function exec(cmd, silent) {
       return shell.exec(cmd, 'boolean' === typeof silent ? silent : true);
+    }
+
+    function get_latest_tag() {
+      var result = exec('git describe --tags `git rev-list --tags --max-count=1`');
+      if (result && 0 !== result.code) {
+        grunt.verbose.warn('No existing tags found...');
+        return false;
+      }
+      return result.output;
     }
 
     function processTemplate(tpl) {
@@ -85,9 +93,6 @@ module.exports = function (grunt) {
           if (!newVersion) {
             newVersion = contents.version;
           }
-          if (!oldVersion) {
-            oldVersion = currentVersionFromFile;
-          }
 
           grunt.file.write(filename, JSON.stringify(contents, null, '  ') + '\n');
 
@@ -102,11 +107,16 @@ module.exports = function (grunt) {
     }
 
     function generate_changelog(config) {
-      var title, titleTPL, commits, filecontents;
+      var title, titleTPL, commits, filecontents, latestTag, range = '';
 
       if (config && config.file) {
         grunt.log.subhead('Updating changelog');
         filecontents = grunt.file.read(config.file);
+
+        latestTag = get_latest_tag();
+        if (latestTag) {
+          range = latestTag + '...HEAD';
+        }
 
         // Convert to Lo-Dash template and resolve to title
         titleTPL = config.title.replace(/{{/g, '<%= ').replace(/}}/g, ' %>');
@@ -114,7 +124,7 @@ module.exports = function (grunt) {
         grunt.verbose.writeln('Resolved title to: ' + title);
 
         grunt.verbose.writeln('Retrieving and parsing all commits since previous tag');
-        commits = exec('git log --pretty=format:"' + config.commitFormat + '" --date-order ' + oldVersion + '...HEAD', false).output + config.seperator;
+        commits = exec('git log --pretty=format:"' + config.commitFormat + '" --date-order ' + range, false).output + config.seperator;
 
         grunt.log.writeln('');
 

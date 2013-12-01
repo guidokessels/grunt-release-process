@@ -58,7 +58,10 @@ module.exports = function (grunt) {
           bump: ['package.json'],
           changelog: {
             file: 'CHANGELOG.md'
-          }
+          },
+          commit: false,
+          push  : false,
+          tag   : false
         }
       }
     },
