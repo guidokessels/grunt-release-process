@@ -37,7 +37,7 @@ module.exports = function (grunt) {
       options.changelog.file         = options.changelog.file         || 'CHANGELOG.md';
       options.changelog.title        = options.changelog.title        || '# <%= version %>';
       options.changelog.seperator    = options.changelog.seperator    || '\n';
-      options.changelog.commitFormat = options.changelog.commitFormat || '- %s ([%h](%H))';
+      options.changelog.commitFormat = options.changelog.commitFormat || '- %s (%h)';
     }
     
     function fail() {
