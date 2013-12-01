@@ -1,3 +1,6 @@
+# 0.1.1
+- Removed SHA-links until a fix for auto-linking can be found (682732e)
+
 # 0.1.0
 - New version will now be based on latest tag, instead of first 'bumped' file (48e8843)
 - Small fix in retrieving previous tag number (106c398)
