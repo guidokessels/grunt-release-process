@@ -27,18 +27,20 @@ The following config lists all available options and their defaults:
 ```js
 grunt.initConfig({
   release_process: {
-    options: {
-      bump      : ['package.json'],
-      changelog : {
-        file         : 'CHANGELOG.md',
-        title        : '# {{version}}',
-        commitFormat : '- %s (%h)',
-        seperator    : '\n'
-      },
-      commit    : 'Release {{version}}',    // use boolean `false` to disable
-      tag       : 'Release {{version}}',    // use boolean `false` to disable
-      push      : true,                     // use boolean `false` to disable
-      remote    : 'origin'
+    dist: {
+      options: {
+        bump      : ['package.json'],
+        changelog : {
+          file         : 'CHANGELOG.md',
+          title        : '# {{version}}',
+          commitFormat : '- %s (%h)',
+          seperator    : '\n'
+        },
+        commit    : 'Release {{version}}',    // use boolean `false` to disable
+        tag       : 'Release {{version}}',    // use boolean `false` to disable
+        push      : true,                     // use boolean `false` to disable
+        remote    : 'origin'
+      }
     }
   },
 })
