@@ -48,12 +48,14 @@ module.exports = function (grunt) {
     }
 
     function get_latest_tag() {
-      var result = exec('git describe --tags `git rev-list --tags --max-count=1`');
+      grunt.log.writeln("Retrieving previous tag number");
+
+      var result = exec('git describe --abbrev=0 --tags');
       if (result && 0 !== result.code) {
         grunt.verbose.warn('No existing tags found...');
         return false;
       }
-      return result.output;
+      return result.output.trim();
     }
 
     function processTemplate(tpl) {
@@ -123,7 +125,7 @@ module.exports = function (grunt) {
         title = processTemplate(titleTPL);
         grunt.verbose.writeln('Resolved title to: ' + title);
 
-        grunt.verbose.writeln('Retrieving and parsing all commits since previous tag');
+        grunt.log.writeln('Retrieving and parsing all commits since previous tag');
         commits = exec('git log --pretty=format:"' + config.commitFormat + '" --date-order ' + range, false).output + config.seperator;
 
         grunt.log.writeln('');
