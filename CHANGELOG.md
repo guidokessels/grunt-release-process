@@ -1,3 +1,6 @@
+# 0.1.3
+- Updated instructions in README (8befe9a)
+
 # 0.1.2
 - Small correction & cleanups (a9f754c)
 - Updated README.md and added some extra logging (a54998e)
