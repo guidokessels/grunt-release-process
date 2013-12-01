@@ -49,17 +49,17 @@ module.exports = function (grunt) {
     }
 
     function get_latest_tag() {
-      grunt.log.writeln("Retrieving previous tag number");
-
       var result = exec('git describe --abbrev=0 --tags');
       if (result && 0 !== result.code) {
-        grunt.verbose.warn('No existing tags found...');
+        grunt.log.warn('No existing tags found...');
         return false;
       }
       return result.output.trim();
     }
 
     function determine_new_version() {
+      grunt.log.subhead("Retrieving previous tag number");
+      grunt.log.write("Found tag... ");
       latestTag = get_latest_tag();
       newVersion = semver.inc(latestTag || '0.0.0', type);
     }

@@ -22,71 +22,106 @@ grunt.loadNpmTasks('grunt-release-process');
 ### Overview
 In your project's Gruntfile, add a section named `release_process` to the data object passed into `grunt.initConfig()`.
 
+
+The following config lists all available options and their defaults:
 ```js
 grunt.initConfig({
   release_process: {
     options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
+      bump      : ['package.json'],
+      changelog : {
+        file         : 'CHANGELOG.md',
+        title        : '# {{version}}',
+        commitFormat : '- %s (%h)',
+        seperator    : '\n'
+      },
+      commit    : 'Release {{version}}',    // use boolean `false` to disable
+      tag       : 'Release {{version}}',    // use boolean `false` to disable
+      push      : true,                     // use boolean `false` to disable
+      remote    : 'origin'
+    }
   },
 })
 ```
 
 ### Options
 
-#### options.separator
+#### options.bump
+Type: `Array` or `false`
+Default value: `['package.json']`
+
+An array of files which versions need to be bumped.
+Use `false` or omit this property if you do not want to use it.
+
+#### options.changelog
+Type: `Object` or `false`
+Default value: `{}` (see below for property defaults)
+
+Use this config object to automatically generate a changelog for your release. 
+This changelog will contain all commits since the previous tag.
+Use `false` or omit this property if you do not want to generate a changelog.
+
+The default values are set up to work with a Markdown file, but you can tweak them to any format you want.
+
+#### options.changelog.file
 Type: `String`
-Default value: `',  '`
+Default value: `'CHANGELOG.md'`
 
-A string value that is used to do something with whatever.
+Name of the file to write changes to. All changes will be prepended to any existing content.
+If the file does not exist, the script will trigger an error.
 
-#### options.punctuation
+#### options.changelog.title
 Type: `String`
-Default value: `'.'`
+Default value: `'# {{version}}`
 
-A string value that is used to do something else with whatever else.
+The title of your release, which will be placed right above this release's changes.
 
-### Usage Examples
+#### options.changelog.commitFormat
+Type: `String`
+Default value: `'- %s (%h)'`
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+Used to format each commit message before it's put in your changelog file.
+The commits are parsed via `git log --pretty:format:"YOUR FORMAT"`. Check Table 2-1 on the following page for all valid options format takes: http://git-scm.com/book/en/Git-Basics-Viewing-the-Commit-History
 
-```js
-grunt.initConfig({
-  release_process: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
+#### options.changelog.seperator
+Type: `String`
+Default value: `'\n'`
 
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+The string to place after each release's commits, and can be used to seperate release by newlines, etc.
 
-```js
-grunt.initConfig({
-  release_process: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
+#### options.commit
+Type: `String` or `false`
+Default value: `'Release {{version}}'`
+
+A string that will be used as commit message when committing all changed files.
+Use `false` if you do not want to commit any files automatically.
+
+#### options.tag
+Type: `String` or `false`
+Default value: `'Release {{version}}'`
+
+A string that will be used as the tag message when creating the tag.
+Use `false` if you do not want to tag your release automatically.
+
+#### options.push
+Type: `Boolean`
+Default value: `true`
+
+Whether you want to push the created tag or not.
+Requires `options.remote` to contain a valid remote name.
+
+#### options.remote
+Type: `String`
+Default value: `'origin'`
+
+The name of the remote you want to push the tag to.
+Requires `options.push` to be set to `true`.
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
-_(Nothing yet)_
+See [CHANGELOG](CHANGELOG.md)
 
 ## License
 Copyright (c) 2013 Guido Kessels. Licensed under the MIT license.
